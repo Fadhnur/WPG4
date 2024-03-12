@@ -11,6 +11,9 @@ public class Pickup : MonoBehaviour
     [SerializeField] private Transform Hand;
     [SerializeField] private GameObject pickUpUI;
 
+    [SerializeField] private GameObject flashlight;
+    private bool inReach;
+
     private Rigidbody CurrentObjectRigidbody;
     private Collider CurrentObjectCollider;
 
@@ -20,6 +23,10 @@ public class Pickup : MonoBehaviour
     
     private RaycastHit hit;
 
+    void Start() {
+        inReach = false;
+        flashlight = GameObject.Find("Flashlight");
+    }
     // Update is called once per frame
     void Update()
     {
@@ -85,11 +92,13 @@ public class Pickup : MonoBehaviour
 
         }
         
+        //Mengaktifkan ui pickUp
         Debug.DrawRay(PlayerCamera.position, PlayerCamera.forward * hitRange, Color.red);
         if (hit.collider != null)
         {
             hit.collider.GetComponent<Highlight>()?.ToggleOutline(false);
             pickUpUI.SetActive(false);
+            
         }
 
         // if (inHandItem != null)
@@ -104,5 +113,37 @@ public class Pickup : MonoBehaviour
             pickUpUI.SetActive(true);
 
         }
+
+        //Menambahkan ke ui battery
+        if(Input.GetKeyDown(KeyCode.E) && inReach && hit.collider.CompareTag("Battery"))
+        {
+            /*currentBattery = hit.collider.gameObject;
+            currentBattery.SetActive(false);*/
+
+            
+            flashlight.GetComponent<FlashLight>().AddBattery();
+            inReach = false;
+
+            //currentBattery = null;
+            //pickUpSound.Play();
+            //Destroy(gameObject);
+        }
     }
+
+    void OnCollisionEnter(Collision other)
+    {
+        if(other.gameObject.CompareTag("Battery"))
+        {
+            inReach = true;
+        }
+    }
+
+    void OnCollisionExit(Collision other) {
+        if(other.gameObject.CompareTag("Battery"))
+        {
+            inReach = false;
+        }
+    }
+
+
 }
